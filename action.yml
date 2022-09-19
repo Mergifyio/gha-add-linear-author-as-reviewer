@@ -31,8 +31,11 @@ runs:
       if: "${{ steps.extract.outputs.creators }}"
       run: |
         for creator in ${{steps.extract.outputs.creators}}; do
-          gh pr view ${{github.event.pull_request.html_url}} --json latestReviews |jq -e '.latestReviews[] | select(.author.login == "'${creator}'" and .state != "DISMISSED") | .author.login' || \
-          gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
+          gh pr view ${{github.event.pull_request.html_url}} --json latestReviews |jq -e '.latestReviews[] | select(.author.login == "'${creator}'" and .state != "DISMISSED")' \
+          && \
+            echo "Review of ${creator} has already been requested" \
+          || \
+            gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
         done
       env:
         GITHUB_TOKEN: ${{inputs.GITHUB_TOKEN}}
