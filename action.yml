@@ -35,7 +35,12 @@ runs:
           && \
             echo "Review of ${creator} has already been requested" \
           || \
-            gh api -X POST ${{github.event.pull_request.html_url}}/requested_reviewers -F "reviewers=[\"${creator}\"]"
+            curl -X POST \
+                -H "Content-type: application/json" \
+                -H "Accept: application/json" \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -d '{"reviewers": ["'${creator}'c"]}' /
+                ${{github.event.pull_request.url}}/requested_reviewers
             # This doesn't work because of https://github.com/cli/cli/issues/4844
             # gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
         done
