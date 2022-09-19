@@ -35,7 +35,9 @@ runs:
           && \
             echo "Review of ${creator} has already been requested" \
           || \
-            gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
+            gh api -X POST ${{github.event.pull_request.html_url}}/requested_reviewers -F "reviewers=[\"${creator}\"]"
+            # This doesn't work because of https://github.com/cli/cli/issues/4844
+            # gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
         done
       env:
         GITHUB_TOKEN: ${{inputs.GITHUB_TOKEN}}
