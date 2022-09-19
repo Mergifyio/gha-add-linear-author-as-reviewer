@@ -8,9 +8,6 @@ inputs:
   GITHUB_TOKEN:
     required: true
     description: 'GitHub Token'
-  PULL_REQUEST_BODY:
-    required: true
-    description: 'Pull request body'
   EMAIL_MAPPING:
     required: true
     description: 'Linear Email to GitHub login mapping (one by line and separated by a space)'
@@ -26,7 +23,7 @@ runs:
       env:
         INPUT_LINEAR_API_KEY: ${{ inputs.LINEAR_API_KEY }}
         INPUT_EMAIL_MAPPING: ${{ inputs.EMAIL_MAPPING }}
-        INPUT_PULL_REQUEST_BODY: ${{ inputs.PULL_REQUEST_BODY }}
+        INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body  }}
     - shell: bash
       if: "${{ steps.extract.outputs.creators }}"
       run: |
