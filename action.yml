@@ -30,6 +30,7 @@ runs:
     - shell: bash
       if: "${{ steps.extract.outputs.creators }}"
       run: |
+        set -x
         for creator in ${{steps.extract.outputs.creators}}; do
           gh pr view ${{github.event.pull_request.html_url}} --json latestReviews |jq -e '.latestReviews[] | select(.author.login == "'${creator}'" and .state != "DISMISSED")' \
           && \
@@ -39,7 +40,7 @@ runs:
                 -H "Content-type: application/json" \
                 -H "Accept: application/json" \
                 -H "Authorization: token $GITHUB_TOKEN" \
-                -d '{"reviewers": ["'${creator}'c"]}' \
+                -d '{"reviewers": ["'${creator}'"]}' \
                 ${{github.event.pull_request.url}}/requested_reviewers
             # This doesn't work because of https://github.com/cli/cli/issues/4844
             # gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
