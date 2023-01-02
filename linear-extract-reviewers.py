@@ -42,8 +42,10 @@ def main() -> None:
         creators = ",".join(
             email_mapping[response["creator"]["email"]]
             for response in responses["data"].values()
+            if response["creator"]
         )
-        print(f"::set-output name=CREATORS::{creators}")
+        if creators:
+            print(f"::set-output name=CREATORS::{creators}")
 
 
 main()
