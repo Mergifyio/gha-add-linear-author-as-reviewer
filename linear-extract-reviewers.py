@@ -42,7 +42,7 @@ def main() -> None:
         creators = ",".join(
             email_mapping[response["creator"]["email"]]
             for response in responses["data"].values()
-            if "creator" in response and response["creator"].get("email") is not None
+            if response.get("creator") and response["creator"].get("email")
         )
         if creators:
             print(f"::set-output name=CREATORS::{creators}")
