@@ -40,7 +40,7 @@ def main() -> None:
             sys.exit(1)
 
         creators = ",".join(
-            email_mapping[response.get("creator", {}).get("email", "")]
+            email_mapping[(response.get("creator") or {}).get("email", "")]
             for response in responses["data"].values()
         )
         if creators:
