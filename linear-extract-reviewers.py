@@ -20,7 +20,7 @@ def main() -> None:
 
     linear_ids = REGEX.findall(pull_request_body)
     if not linear_ids:
-        print("No linear ticket found")
+        print("No linear ticket found", file=sys.stderr)
         return
 
     issue_queries = ""
@@ -28,7 +28,7 @@ def main() -> None:
         issue_queries += f'{linear_id.replace("-", "_")}: issue(id: "{linear_id}") {{ creator {{ email }} }} '
 
     query = {"query": f"query {{ {issue_queries} }}"}
-    print(query)
+    print(query, file=sys.stderr)
 
     with httpx.Client(
         base_url="https://api.linear.app",
@@ -36,7 +36,7 @@ def main() -> None:
     ) as linear:
         responses = linear.post("/graphql", json=query).json()
         if "error" in responses:
-            print(responses)
+            print(responses, file=sys.stderr)
             sys.exit(1)
 
         creators = ",".join(
@@ -45,7 +45,7 @@ def main() -> None:
             if response.get("creator") and response["creator"].get("email")
         )
         if creators:
-            print(f"::set-output name=CREATORS::{creators}")
+            print(f"CREATORS={creators}")
 
 
 main()
