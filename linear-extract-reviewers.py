@@ -33,6 +33,7 @@ def main() -> None:
     with httpx.Client(
         base_url="https://api.linear.app",
         headers={"Content-Type": "application/json", "Authorization": linear_api_key},
+        timeout=httpx.Timeout(timeout=15.0)
     ) as linear:
         responses = linear.post("/graphql", json=query).json()
         if "error" in responses:
