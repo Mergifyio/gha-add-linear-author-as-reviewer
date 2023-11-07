@@ -24,7 +24,12 @@ jobs:
         with:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
-           EMAIL_MAPPING: |
-             sileht@mergify.com sileht
-             jd@mergify.com jd
+           EMAIL_MAPPING: ${{ vars.EMAIL_MAPPING }}
+```
+
+The email mapping GitHub Action variables format is:
+
+```
+sileht@mergify.com sileht
+jd@mergify.com jd
 ```
