@@ -4,13 +4,14 @@ import sys
 
 import httpx
 
-REGEX = re.compile(r"MRGFY-\d+")
 
 
 def main() -> None:
     linear_api_key = os.environ["INPUT_LINEAR_API_KEY"]
+    linear_issue_regex = os.environ["INPUT_LINEAR_ISSUE_REGEX"]
     pull_request_body = os.environ["INPUT_PULL_REQUEST_BODY"]
     raw_mapping = os.environ["INPUT_EMAIL_MAPPING"]
+
 
     email_mapping = {}
     for line in raw_mapping.split("\n"):
@@ -18,7 +19,7 @@ def main() -> None:
             email, _, login = line.strip().partition(" ")
             email_mapping[email] = login.strip()
 
-    linear_ids = REGEX.findall(pull_request_body)
+    linear_ids = re.findall(linear_issue_regex, pull_request_body)
     if not linear_ids:
         print("No linear ticket found", file=sys.stderr)
         return
