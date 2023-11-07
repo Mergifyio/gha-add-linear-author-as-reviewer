@@ -1,0 +1,60 @@
+extends: .github
+shared:
+  DefaultQueueOptions: &DefaultQueueOptions
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+    allow_inplace_checks: true
+    merge_method: squash
+    speculative_checks: 5
+queue_rules:
+  - name: default
+    <<: *DefaultQueueOptions
+    queue_conditions:
+      - "#approved-reviews-by>=1"
+      - "#changes-requested-reviews-by=0"
+      - "#review-threads-unresolved=0"
+      - "#review-requested=0"
+    merge_conditions: []
+
+  - name: lowprio
+    <<: *DefaultQueueOptions
+    queue_conditions:
+      - "#commits=1"
+      - author=dependabot[bot]
+    merge_method: merge
+    merge_conditions: []
+    speculative_checks: 1
+    batch_size: 7
+    batch_max_wait_time: 5min
+    commit_message_template: null
+    queue_branch_merge_method: fast-forward
+    disallow_checks_interruption_from_queues:
+      - default
+
+pull_request_rules:
+  - name: automatic merge
+    conditions:
+      - base=main
+      - label!=manual merge
+      - check-success=semantic-pull-request
+    actions:
+      queue:
+
+  - name: request review
+    conditions:
+      - -author=dependabot[bot]
+      - -author=mergify-ci-bot
+      - -merged
+      - -closed
+      - and: *CheckRuns
+      - "check-success=Rule: feature requirements (post_check)"
+      - "check-success=Rule: testing requirements (post_check)"
+      - "#approved-reviews-by=0"
+      - "#changes-requested-reviews-by=0"
+      - "review-requested!=@devs"
+    actions:
+      request_reviews:
+        teams:
+          - devs
