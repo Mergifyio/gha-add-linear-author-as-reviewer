@@ -48,9 +48,6 @@ pull_request_rules:
       - -author=mergify-ci-bot
       - -merged
       - -closed
-      - and: *CheckRuns
-      - "check-success=Rule: feature requirements (post_check)"
-      - "check-success=Rule: testing requirements (post_check)"
       - "#approved-reviews-by=0"
       - "#changes-requested-reviews-by=0"
       - "review-requested!=@devs"
