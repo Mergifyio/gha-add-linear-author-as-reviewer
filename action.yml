@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         python3 -m venv venv
-        venv/bin/pip install httpx
+        venv/bin/pip install -r requirements.txt
         venv/bin/python ${{ github.action_path }}/linear-extract-reviewers.py >> $GITHUB_OUTPUT
       env:
         INPUT_LINEAR_API_KEY: ${{ inputs.LINEAR_API_KEY }}
