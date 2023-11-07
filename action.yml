@@ -14,6 +14,10 @@ inputs:
   EMAIL_MAPPING:
     required: true
     description: 'Linear Email to GitHub login mapping (one by line and separated by a space)'
+  LINEAR_ISSUE_REGEX:
+    required: false
+    description: 'Linear issue regex to find the issue ID'
+    default: "MRGFY-\d+"
 runs:
   using: 'composite'
   steps:
@@ -25,6 +29,7 @@ runs:
         venv/bin/python ${{ github.action_path }}/linear-extract-reviewers.py >> $GITHUB_OUTPUT
       env:
         INPUT_LINEAR_API_KEY: ${{ inputs.LINEAR_API_KEY }}
+        INPUT_LINEAR_ISSUE_REGEX: ${{ inputs.LINEAR_ISSUE_REGEX }}
         INPUT_EMAIL_MAPPING: ${{ inputs.EMAIL_MAPPING }}
         INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body  }}
     - shell: bash

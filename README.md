@@ -24,6 +24,7 @@ jobs:
         with:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+           LINEAR_ISSUE_REGEX: "MRGFY-\d+"
            EMAIL_MAPPING: ${{ vars.EMAIL_MAPPING }}
 ```
 
