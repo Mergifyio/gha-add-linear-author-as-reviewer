@@ -17,7 +17,7 @@ inputs:
   LINEAR_ISSUE_REGEX:
     required: false
     description: 'Linear issue regex to find the issue ID'
-    default: "MRGFY-\d+"
+    default: 'MRGFY-\d+'
 runs:
   using: 'composite'
   steps:
