@@ -30,6 +30,6 @@ jobs:
 The email mapping GitHub Action variables format is:
 
 ```
-sileht@mergify.com sileht
-jd@mergify.com jd
+user1@example.com github-user-login-1
+user2@example.com github-user-login-2
 ```
