@@ -1,6 +1,9 @@
 name: 'add-linear-author-as-reviewer'
 description: 'Add Linear author as reviewer'
 author: 'Mergify'
+branding:
+  icon: 'at-sign'
+  color: 'blue'
 inputs:
   LINEAR_API_KEY:
     required: true
