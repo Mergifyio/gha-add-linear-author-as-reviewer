@@ -38,7 +38,7 @@ pull_request_rules:
     conditions:
       - base=main
       - label!=manual merge
-      - check-success=semantic-pull-request
+      - "check-success=Rule: Conventional Commit (post_check)"
     actions:
       queue:
 
@@ -55,3 +55,22 @@ pull_request_rules:
       request_reviews:
         teams:
           - devs
+
+  - name: Conventional Commit
+    conditions:
+      - base=main
+    actions:
+      post_check:
+        success_conditions:
+          - "title ~= ^(fix|feat|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\(.+\\))?:"
+        title: |
+          {% if check_succeed %}
+          Title follows Conventional Commit
+          {% else %}
+          Title does not follow Conventional Commit
+          {% endif %}
+        summary: |
+          {% if not check_succeed %}
+          The pull request title must follow
+          [Conventional Commit](https://www.conventionalcommits.org/en/v1.0.0/).
+          {% endif %}
