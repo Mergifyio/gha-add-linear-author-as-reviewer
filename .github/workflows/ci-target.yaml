@@ -1,0 +1,25 @@
+name: Continuous Integration (target)
+permissions: read-all
+
+on:
+  # NOTE(sileht): safe as long as we don't run/build anything from the pull request
+  # BEWARE THIS WORKFLOW USE actions/checkout, any change must take care of
+  # https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+  pull_request_target:
+    branches:
+      - main
+      - devs/**
+    types:
+      - opened
+      - edited
+      - synchronize
+
+jobs:
+  semantic-pull-request:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        if: ${{ !startsWith(github.head_ref, 'mergify/merge-queue/') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
