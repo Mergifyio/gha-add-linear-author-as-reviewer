@@ -41,13 +41,18 @@ def main() -> None:
             print(responses, file=sys.stderr)
             sys.exit(1)
 
-        creators = ",".join(
-            email_mapping[response["creator"]["email"]]
-            for response in responses["data"].values()
-            if response.get("creator") and response["creator"].get("email")
-        )
-        if creators:
-            print(f"CREATORS={creators}")
+        try:
+            creators = ",".join(
+                email_mapping[response["creator"]["email"]]
+                for response in responses["data"].values()
+                if response.get("creator") and response["creator"].get("email")
+            )
+            if creators:
+                print(f"CREATORS={creators}")
+        except Exception:
+            print(responses, file=sys.stderr)
+            raise
+
 
 
 main()
