@@ -1,9 +1,9 @@
 import os
+import json
 import re
 import sys
 
 import httpx
-
 
 
 def main() -> None:
@@ -11,7 +11,6 @@ def main() -> None:
     linear_issue_regex = os.environ["INPUT_LINEAR_ISSUE_REGEX"]
     pull_request_body = os.environ["INPUT_PULL_REQUEST_BODY"]
     raw_mapping = os.environ["INPUT_EMAIL_MAPPING"]
-
 
     email_mapping = {}
     for line in raw_mapping.split("\n"):
@@ -34,25 +33,31 @@ def main() -> None:
     with httpx.Client(
         base_url="https://api.linear.app",
         headers={"Content-Type": "application/json", "Authorization": linear_api_key},
-        timeout=httpx.Timeout(timeout=15.0)
+        timeout=httpx.Timeout(timeout=15.0),
     ) as linear:
-        responses = linear.post("/graphql", json=query).json()
-        if "error" in responses:
-            print(responses, file=sys.stderr)
+        raw_response = linear.post("/graphql", json=query)
+        try:
+            response_json = raw_response.json()
+        except json.JSONDecodeError:
+            print("Failed to decode JSON response", file=sys.stderr)
+            print(raw_response.text, file=sys.stderr)
+            sys.exit(1)
+
+        if "error" in response_json:
+            print(response_json, file=sys.stderr)
             sys.exit(1)
 
         try:
             creators = ",".join(
                 email_mapping[response["creator"]["email"]]
-                for response in responses["data"].values()
+                for response in response_json["data"].values()
                 if response.get("creator") and response["creator"].get("email")
             )
             if creators:
                 print(f"CREATORS={creators}")
         except Exception:
-            print(responses, file=sys.stderr)
+            print(response_json, file=sys.stderr)
             raise
-
 
 
 main()
