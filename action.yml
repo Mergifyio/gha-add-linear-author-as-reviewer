@@ -31,7 +31,8 @@ runs:
         INPUT_LINEAR_API_KEY: ${{ inputs.LINEAR_API_KEY }}
         INPUT_LINEAR_ISSUE_REGEX: ${{ inputs.LINEAR_ISSUE_REGEX }}
         INPUT_EMAIL_MAPPING: ${{ inputs.EMAIL_MAPPING }}
-        INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body  }}
+        INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
+        INPUT_PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
     - shell: bash
       if: "${{ steps.extract.outputs.creators }}"
       run: |
@@ -48,6 +49,7 @@ runs:
                 -d '{"reviewers": ["'${creator}'"]}' \
                 ${{github.event.pull_request.url}}/requested_reviewers
             # This doesn't work because of https://github.com/cli/cli/issues/4844
+            # This may be fixed upstream now, as the related issue has been closed.
             # gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
         done
       env:
