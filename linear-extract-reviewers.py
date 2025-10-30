@@ -9,7 +9,7 @@ import httpx
 def main() -> None:
     linear_api_key = os.environ["INPUT_LINEAR_API_KEY"]
     linear_issue_regex = os.environ["INPUT_LINEAR_ISSUE_REGEX"]
-    pull_request_body = os.environ["INPUT_PULL_REQUEST_BODY"]
+    pull_request_details = os.environ.get("INPUT_PULL_REQUEST_TITLE", "") + " " + os.environ.get("INPUT_PULL_REQUEST_BODY", "")
     raw_mapping = os.environ["INPUT_EMAIL_MAPPING"]
 
     email_mapping = {}
@@ -18,7 +18,7 @@ def main() -> None:
             email, _, login = line.strip().partition(" ")
             email_mapping[email] = login.strip()
 
-    linear_ids = re.findall(linear_issue_regex, pull_request_body)
+    linear_ids = re.findall(linear_issue_regex, pull_request_details)
     if not linear_ids:
         print("No linear ticket found", file=sys.stderr)
         return
