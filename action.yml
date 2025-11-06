@@ -42,20 +42,33 @@ runs:
       if: "${{ steps.extract.outputs.creators }}"
       run: |
         set -x
-        for creator in ${{steps.extract.outputs.creators}}; do  
-          gh pr view ${{github.event.pull_request.html_url}} --json latestReviews |jq -e '.latestReviews[] | select(.author.login == "'${creator}'" and .state != "DISMISSED" and .state != "COMMENTED")' \
-          && \
-            echo "Review of ${creator} has already been requested" \
-          || \
-            curl -X POST \
-                -H "Content-type: application/json" \
-                -H "Accept: application/json" \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -d '{"reviewers": ["'${creator}'"]}' \
-                ${{github.event.pull_request.url}}/requested_reviewers
-            # This doesn't work because of https://github.com/cli/cli/issues/4844
-            # This may be fixed upstream now, as the related issue has been closed.
-            # gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
+        # Parse creator string which may be comma-separated
+        for creator in ${{steps.extract.outputs.creators}}; do
+          # Check if creator contains commas (multiple reviewers)
+          if [[ "${creator}" == *","* ]]; then
+            # Split by comma and process each reviewer
+            IFS=',' read -ra reviewers <<< "${creator}"
+            for reviewer in "${reviewers[@]}"; do
+              # Trim whitespace
+              reviewer=$(echo "${reviewer}" | xargs)
+              (gh pr view ${{github.event.pull_request.html_url}} --json latestReviews | jq -e '.latestReviews[] | select(.author.login == "'${reviewer}'" and .state != "DISMISSED" and .state != "COMMENTED")' && \
+              echo "Review of ${reviewer} has already been requested") \
+              || \
+              (gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer ${reviewer} && \
+              echo "Requested user review from ${reviewer} via 'gh' CLI") \
+              || \
+              echo "Failed to request review from ${reviewer}"
+            done
+          else
+            # Single reviewer
+            (gh pr view ${{github.event.pull_request.html_url}} --json latestReviews | jq -e '.latestReviews[] | select(.author.login == "'${creator}'" and .state != "DISMISSED" and .state != "COMMENTED")' && \
+            echo "Review of ${creator} has already been requested") \
+            || \
+            (gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer ${creator} && \
+            echo "Requested user review from ${creator} via 'gh' CLI") \
+            || \
+            echo "Failed to request review from ${creator}"
+          fi
         done
       env:
         GITHUB_TOKEN: ${{inputs.GITHUB_TOKEN}}
