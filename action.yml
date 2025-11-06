@@ -11,6 +11,10 @@ inputs:
   GITHUB_TOKEN:
     required: true
     description: 'GitHub Token'
+  DEFAULT_REVIEWER: 
+    required: false
+    description: 'Default GH reviewer if no Linear author found'
+    default: ''
   EMAIL_MAPPING:
     required: true
     description: 'Linear Email to GitHub login mapping (one by line and separated by a space)'
@@ -30,6 +34,7 @@ runs:
       env:
         INPUT_LINEAR_API_KEY: ${{ inputs.LINEAR_API_KEY }}
         INPUT_LINEAR_ISSUE_REGEX: ${{ inputs.LINEAR_ISSUE_REGEX }}
+        INPUT_DEFAULT_REVIEWER: ${{ inputs.DEFAULT_REVIEWER }}
         INPUT_EMAIL_MAPPING: ${{ inputs.EMAIL_MAPPING }}
         INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
         INPUT_PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}

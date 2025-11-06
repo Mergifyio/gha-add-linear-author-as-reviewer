@@ -26,6 +26,7 @@ jobs:
            LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
            LINEAR_ISSUE_REGEX: "MRGFY-\d+"
            EMAIL_MAPPING: ${{ vars.EMAIL_MAPPING }}
+           DEFAULT_REVIEWER: "gh_username_or_team"
 ```
 
 The email mapping GitHub Action variables format is:
