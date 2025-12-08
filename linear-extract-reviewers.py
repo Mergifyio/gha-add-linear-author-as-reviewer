@@ -11,6 +11,7 @@ def main() -> None:
     linear_issue_regex = os.environ["INPUT_LINEAR_ISSUE_REGEX"]
     pull_request_details = os.environ.get("INPUT_PULL_REQUEST_TITLE", "") + " " + os.environ.get("INPUT_PULL_REQUEST_BODY", "")
     raw_mapping = os.environ["INPUT_EMAIL_MAPPING"]
+    default_reviewer = os.environ.get("INPUT_DEFAULT_REVIEWER", "")
 
     email_mapping = {}
     for line in raw_mapping.split("\n"):
@@ -48,13 +49,26 @@ def main() -> None:
             sys.exit(1)
 
         try:
-            creators = ",".join(
-                email_mapping[response["creator"]["email"]]
-                for response in response_json["data"].values()
-                if response.get("creator") and response["creator"].get("email")
-            )
+            creators = set()
+            for response in response_json["data"].values():
+                if response.get("creator") and response["creator"].get("email"):
+                    email = response["creator"]["email"]
+                    if email in email_mapping:
+                        creators.add(email_mapping[email])
+                    elif default_reviewer:
+                        print(f"The ticket owner does not appear in the mapping variable. Using default reviewer: {default_reviewer}", file=sys.stderr)
+                        creators.add(default_reviewer)
+                    else:
+                        print("The ticket owner does not appear in the mapping variable.", file=sys.stderr)
+                        return
+                elif default_reviewer:
+                    print(f"No creator email found for ticket. Using default reviewer: {default_reviewer}", file=sys.stderr)
+                    creators.add(default_reviewer)
+                else:
+                    print("No creator email found for ticket and no default reviewer set. Skipping ticket.", file=sys.stderr)
+
             if creators:
-                print(f"CREATORS={creators}")
+                print(f"CREATORS={','.join(creators)}")
         except Exception:
             print(response_json, file=sys.stderr)
             raise

@@ -11,6 +11,10 @@ inputs:
   GITHUB_TOKEN:
     required: true
     description: 'GitHub Token'
+  DEFAULT_REVIEWER:
+    required: false
+    description: 'Default GH reviewer if no Linear author found'
+    default: ''
   EMAIL_MAPPING:
     required: true
     description: 'Linear Email to GitHub login mapping (one by line and separated by a space)'
@@ -30,6 +34,7 @@ runs:
       env:
         INPUT_LINEAR_API_KEY: ${{ inputs.LINEAR_API_KEY }}
         INPUT_LINEAR_ISSUE_REGEX: ${{ inputs.LINEAR_ISSUE_REGEX }}
+        INPUT_DEFAULT_REVIEWER: ${{ inputs.DEFAULT_REVIEWER }}
         INPUT_EMAIL_MAPPING: ${{ inputs.EMAIL_MAPPING }}
         INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
         INPUT_PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
@@ -37,20 +42,19 @@ runs:
       if: "${{ steps.extract.outputs.creators }}"
       run: |
         set -x
-        for creator in ${{steps.extract.outputs.creators}}; do  
-          gh pr view ${{github.event.pull_request.html_url}} --json latestReviews |jq -e '.latestReviews[] | select(.author.login == "'${creator}'" and .state != "DISMISSED" and .state != "COMMENTED")' \
-          && \
-            echo "Review of ${creator} has already been requested" \
+        # Split creators string by commas and process each reviewer
+        creators="${{steps.extract.outputs.creators}}"
+        IFS=',' read -ra reviewers <<< "$creators"
+        for reviewer in "${reviewers[@]}"; do
+          # Trim whitespace
+          reviewer=$(echo "${reviewer}" | xargs)
+          (gh pr view ${{github.event.pull_request.html_url}} --json latestReviews | jq -e '.latestReviews[] | select(.author.login == "'${reviewer}'" and .state != "DISMISSED" and .state != "COMMENTED")' && \
+          echo "Review of ${reviewer} has already been requested") \
           || \
-            curl -X POST \
-                -H "Content-type: application/json" \
-                -H "Accept: application/json" \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -d '{"reviewers": ["'${creator}'"]}' \
-                ${{github.event.pull_request.url}}/requested_reviewers
-            # This doesn't work because of https://github.com/cli/cli/issues/4844
-            # This may be fixed upstream now, as the related issue has been closed.
-            # gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer $creator
+          (gh pr edit ${{github.event.pull_request.html_url}} --add-reviewer ${reviewer} && \
+          echo "Requested user review from ${reviewer} via 'gh' CLI") \
+          || \
+          echo "Failed to request review from ${reviewer}"
         done
       env:
         GITHUB_TOKEN: ${{inputs.GITHUB_TOKEN}}
