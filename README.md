@@ -13,7 +13,9 @@ on:
     types: [ "opened", "synchronize", "reopened", "edited" ]
 
 
-permissions: write-all
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   add-linear-author-as-reviewer:
