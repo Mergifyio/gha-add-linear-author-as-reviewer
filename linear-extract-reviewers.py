@@ -50,20 +50,22 @@ def main() -> None:
 
         try:
             creators = []
-            for response in response_json["data"].values():
+            for ticket_key, response in response_json["data"].items():
                 if response.get("creator") and response["creator"].get("email"):
                     email = response["creator"]["email"]
                     if email in email_mapping:
                         creators.append(email_mapping[email])
                     elif default_reviewer:
-                        print(f"The ticket owner does not appear in the mapping variable. Using default reviewer: {default_reviewer}", file=sys.stderr)
+                        print(f"The ticket owner for ticket '{ticket_key}' does not appear in the mapping variable. Using default reviewer: {default_reviewer}", file=sys.stderr)
                         creators.append(default_reviewer)
                     else:
-                        print("The ticket owner does not appear in the mapping variable.", file=sys.stderr)
+                        print(f"The ticket owner for ticket '{ticket_key}' does not appear in the mapping variable.", file=sys.stderr)
                         return
                 elif default_reviewer:
-                    print(f"No creator email found for ticket. Using default reviewer: {default_reviewer}", file=sys.stderr)
+                    print(f"No creator email found for ticket '{ticket_key}'. Using default reviewer: {default_reviewer}", file=sys.stderr)
                     creators.append(default_reviewer)
+                else:
+                    print("No creator email found for ticket and no default reviewer set. Skipping ticket.", file=sys.stderr)
 
             if creators:
                 print(f"CREATORS={','.join(creators)}")
