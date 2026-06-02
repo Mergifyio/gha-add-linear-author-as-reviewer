@@ -1,5 +1,5 @@
 name: 'add-linear-author-as-reviewer'
-description: 'Add Linear author as reviewer'
+description: 'Add the Linear project lead as reviewer'
 author: 'Mergify'
 branding:
   icon: 'at-sign'
@@ -13,7 +13,7 @@ inputs:
     description: 'GitHub Token'
   DEFAULT_REVIEWER:
     required: false
-    description: 'Default GH reviewer if no Linear author found'
+    description: 'Default GH reviewer if no Linear project lead found'
     default: ''
   EMAIL_MAPPING:
     required: true
@@ -39,12 +39,11 @@ runs:
         INPUT_PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
         INPUT_PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
     - shell: bash
-      if: "${{ steps.extract.outputs.creators }}"
+      if: "${{ steps.extract.outputs.reviewers }}"
       run: |
         set -x
-        # Split creators string by commas and process each reviewer
-        creators="${{steps.extract.outputs.creators}}"
-        IFS=',' read -ra reviewers <<< "$creators"
+        # Split reviewers string by commas and process each reviewer
+        IFS=',' read -ra reviewers <<< "${{steps.extract.outputs.reviewers}}"
         for reviewer in "${reviewers[@]}"; do
           # Trim whitespace
           reviewer=$(echo "${reviewer}" | xargs)
