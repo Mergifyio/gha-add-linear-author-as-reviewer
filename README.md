@@ -1,6 +1,6 @@
 # add-linear-author-as-reviewer
 
-This project is a GitHub action that requests a review from the Linear issue author.
+This project is a GitHub action that requests a review from the lead of the Linear project the referenced issue belongs to.
 
 Usage example:
 

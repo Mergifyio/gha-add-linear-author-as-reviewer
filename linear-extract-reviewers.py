@@ -26,7 +26,7 @@ def main() -> None:
 
     issue_queries = ""
     for linear_id in linear_ids:
-        issue_queries += f'{linear_id.replace("-", "_")}: issue(id: "{linear_id}") {{ creator {{ email }} }} '
+        issue_queries += f'{linear_id.replace("-", "_")}: issue(id: "{linear_id}") {{ project {{ lead {{ email }} }} }} '
 
     query = {"query": f"query {{ {issue_queries} }}"}
     print(query, file=sys.stderr)
@@ -49,26 +49,29 @@ def main() -> None:
             sys.exit(1)
 
         try:
-            creators = set()
+            reviewers = set()
             for response in response_json["data"].values():
-                if response.get("creator") and response["creator"].get("email"):
-                    email = response["creator"]["email"]
+                response = response or {}
+                project = response.get("project") or {}
+                lead = project.get("lead") or {}
+                email = lead.get("email")
+                if email:
                     if email in email_mapping:
-                        creators.add(email_mapping[email])
+                        reviewers.add(email_mapping[email])
                     elif default_reviewer:
-                        print(f"The ticket owner does not appear in the mapping variable. Using default reviewer: {default_reviewer}", file=sys.stderr)
-                        creators.add(default_reviewer)
+                        print(f"The project lead does not appear in the mapping variable. Using default reviewer: {default_reviewer}", file=sys.stderr)
+                        reviewers.add(default_reviewer)
                     else:
-                        print("The ticket owner does not appear in the mapping variable.", file=sys.stderr)
+                        print("The project lead does not appear in the mapping variable.", file=sys.stderr)
                         return
                 elif default_reviewer:
-                    print(f"No creator email found for ticket. Using default reviewer: {default_reviewer}", file=sys.stderr)
-                    creators.add(default_reviewer)
+                    print(f"No project lead email found for ticket. Using default reviewer: {default_reviewer}", file=sys.stderr)
+                    reviewers.add(default_reviewer)
                 else:
-                    print("No creator email found for ticket and no default reviewer set. Skipping ticket.", file=sys.stderr)
+                    print("No project lead email found for ticket and no default reviewer set. Skipping ticket.", file=sys.stderr)
 
-            if creators:
-                print(f"CREATORS={','.join(creators)}")
+            if reviewers:
+                print(f"REVIEWERS={','.join(reviewers)}")
         except Exception:
             print(response_json, file=sys.stderr)
             raise
