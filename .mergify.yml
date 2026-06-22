@@ -7,14 +7,16 @@ shared:
       {{ body }}
     allow_inplace_checks: true
     merge_method: squash
+  DefaultReviewCond: &DefaultReviewCond
+    - "#approved-reviews-by>=1"
+    - author=dependabot[bot]
+    - author=mergify-ci-bot
 queue_rules:
   - name: default
     <<: *DefaultQueueOptions
     queue_conditions:
-      - "#approved-reviews-by>=1"
-      - "#changes-requested-reviews-by=0"
-      - "#review-threads-unresolved=0"
-      - "#review-requested=0"
+      - base=main
+      - -author=dependabot[bot]
     merge_conditions: []
 
   - name: lowprio
@@ -50,5 +52,15 @@ pull_request_rules:
         teams:
           - devs
 
+merge_protections:
+  - name: 👀 Review Requirements
+    if: []
+    success_conditions:
+      - or: *DefaultReviewCond
+
 merge_queue:
   max_parallel_checks: 5
+
+merge_protections_settings:
+  reporting_method: deployments
+  auto_merge_conditions: true
