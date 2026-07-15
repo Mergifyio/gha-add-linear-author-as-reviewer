@@ -5,7 +5,6 @@ shared:
       {{ title }} (#{{ number }})
 
       {{ body }}
-    allow_inplace_checks: true
     merge_method: squash
   DefaultReviewCond: &DefaultReviewCond
     - "#approved-reviews-by>=1"
@@ -24,12 +23,11 @@ queue_rules:
     queue_conditions:
       - "#commits=1"
       - author=dependabot[bot]
-    merge_method: merge
+    merge_method: fast-forward
     merge_conditions: []
     batch_size: 7
     batch_max_wait_time: 5min
     commit_message_template:
-    queue_branch_merge_method: fast-forward
 pull_request_rules:
   - name: automatic merge
     conditions:
