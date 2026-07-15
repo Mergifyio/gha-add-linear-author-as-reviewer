@@ -1,10 +1,9 @@
 extends: .github
 shared:
   DefaultQueueOptions: &DefaultQueueOptions
-    commit_message_template: |
-      {{ title }} (#{{ number }})
-
-      {{ body }}
+    commit_message_format:
+      title: pr-title
+      body: pr-body
     merge_method: squash
   DefaultReviewCond: &DefaultReviewCond
     - "#approved-reviews-by>=1"
@@ -27,7 +26,7 @@ queue_rules:
     merge_conditions: []
     batch_size: 7
     batch_max_wait_time: 5min
-    commit_message_template:
+    commit_message_format:
 pull_request_rules:
   - name: automatic merge
     conditions:
