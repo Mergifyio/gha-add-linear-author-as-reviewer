@@ -4,6 +4,8 @@ shared:
     commit_message_format:
       title: pr-title
       body: pr-body
+      trailers:
+        - approved-by
     merge_method: squash
   DefaultReviewCond: &DefaultReviewCond
     - "#approved-reviews-by>=1"
